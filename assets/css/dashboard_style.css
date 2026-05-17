@@ -1,0 +1,529 @@
+
+
+/* Dashboard Table Css */
+
+.inputarae {
+    display: flex;
+  }
+  
+  .inputarae button {
+    margin-left: 10px;
+  }
+  
+  .sting_icon img {
+    width: 25px;
+    cursor: pointer;
+  }
+  
+  .Step4From .modal-dialog {
+    max-width: 900px;
+  }
+  
+  .Step4From .form-group {
+    margin-bottom: 10px;
+  }
+  
+  .Step4From .form-group label {
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  
+  .sting_icon_btn {
+    padding: 0;
+    background-color: transparent;
+    border: navajowhite;
+    box-shadow: none;
+  }
+  
+  
+  .main {
+    position: relative;
+  }
+  
+  .sidebar {
+    position: fixed;
+    left: 0;
+    width: 260px;
+    background-color: #000;
+    height: 100%;
+    top: 0;
+    z-index: 99;
+    padding-top: 60px;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 20px;
+    transition: all 0.4s;
+  }
+  
+  .inner_main {
+    max-width: 100%;
+    padding: 0px 100px;
+    width: 100%;
+  }
+  
+  .topBar {
+    min-height: 46px;
+    background: #eee;
+    padding: 2px 100px;
+  }
+  
+  .mainArea {
+    transition: all 0.4s;
+  }
+  
+  .openBar .mainArea {
+    margin-left: 220px;
+  }
+  
+  .IconClick {
+    background: transparent;
+    border: 0;
+    width: 50px;
+    padding: 5px;
+  }
+  
+  .IconClick img {
+    width: 100%;
+  }
+  
+  #close_sidebar {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+  }
+  
+  .closeBar .sidebar {
+    left: -260px;
+  }
+  
+  #open_sidebar {
+    width: 35px;
+    line-height: 1;
+    padding: 5px !important;
+    margin-top: 3px;
+  }
+  
+  .sideMenu_ottr ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 30px;
+  }
+  
+  .sideMenu_ottr {
+    margin-top: 20px;
+    padding-bottom: 20px;
+    overflow-y: scroll;
+    height: 100%;
+  }
+  
+  .sideMenu_ottr ul li {
+    margin-bottom: 25px;
+  }
+  
+  .sideMenu_ottr ul li a {
+    color: #fff;
+    text-decoration: navajowhite;
+    font-size: 18px;
+    text-transform: uppercase;
+  }
+  
+  .hdFlex.d-flex {
+    align-items: center;
+  }
+  
+  .hdFlex.d-flex {
+    align-items: center;
+    justify-content: flex-end;
+    padding: 15px 0;
+  }
+  
+  .form-group.checkbox_ottr {
+    margin: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+  }
+  .form-group.checkbox_ottr label, .form-group.checkbox_ottr button {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    padding: 10px !important;
+    background-color: #e3e3e3 !important;
+    border-radius: 5px;
+  }
+  .form-group.checkbox_ottr label img,.form-group.checkbox_ottr button img {
+    width: 13px;
+  }
+  /*.checkbox_ottr .checkbox label:first-child {
+    margin-right: 10px;
+  }*/
+  .checkbox_ottr .checkbox {
+    display: flex;
+  }
+  .form-group.checkbox_ottr button {
+    line-height: 1;
+    border: 0;
+    background-color: transparent;
+    padding: 0;
+  }
+  
+
+  body {
+  padding: 1em 3em;
+}
+
+.dataTables_filter {
+  float:right;
+  margin-bottom: 1em;
+  
+  &:after {
+    clear:both;
+  }
+}
+
+.dt-buttons a .glyphicon {
+  visibility: hidden;
+}
+.dt-buttons a:hover .glyphicon {
+  visibility: visible;
+}
+.dt-search {
+    margin: 0 0 20px 0;
+}
+.dt-paging.paging_full_numbers {
+    margin-top: 10px !important;
+}
+[data-tooltip]:hover::after {
+	display: block;
+	position: absolute;
+	content: attr(data-tooltip);
+	border: 1px solid #0d6efd;
+	background: #0d6efd;
+	padding: .25em .25em;
+	font-size:12px;
+	color:white;
+	top:-25px;
+	border-radius:8px;
+	width:75px;
+	left: -50px;
+}
+button[data-tooltip] {
+    position: relative;
+    background: transparent;
+}
+
+td.dt-type-numeric {
+    text-align: left !important;
+}
+th.dt-type-numeric {
+    text-align: left !important;
+}
+  
+  /* Dashboard Table Css End*/
+
+button.del_sub_url {
+    margin-left: 10px !important;
+}
+button.add_sub_url {
+    margin-left: 10px !important;
+}
+.cmn_icon {
+  border: 0;
+  background-color: transparent;
+  line-height: 1;
+  padding: 2px 2px;
+  margin: 5px !important;
+}
+.cmn_icon:hover,.cmn_icon:focus{
+  background-color: transparent;
+}
+@media screen and (max-width: 991px) {
+    .sidebar {
+      position: absolute;
+      height: 100vh;
+    }
+  
+    .openBar .mainArea {
+      margin-left: 0;
+    }
+  
+  
+    .topBar,
+    .inner_main {
+      padding-left: 30px;
+      padding-right: 30px;
+    }
+  
+    .sideMenu_ottr ul li a {
+      font-size: 15px;
+    }
+  
+    .sideMenu_ottr ul li {
+      margin-bottom: 15px;
+    }
+  
+    .IconClick {
+      width: 40px;
+    }
+  
+    .sidebar {
+      width: 220px;
+    }
+  
+    #open_sidebar {
+      width: 35px;
+    }
+  }
+  
+  
+  .hdFlex {
+		display: flex;
+		justify-content: flex-end;
+		margin-bottom: 20px;
+	}
+	.AddRecord {
+		margin-left: 10px;
+		margin-top: 0;
+	}
+  
+  
+
+/*@media screen and (max-width: 768px) {
+	
+	th:nth-child(3), td:nth-child(3) {
+	word-break: inherit;
+	width:20px!important;
+	}
+	
+}*/
+  
+  @media screen and (max-width: 575px) {
+    /*.hdFlex {
+      flex-direction: column-reverse;
+      align-items: flex-end;
+    }
+  
+    .AddRecord {
+      margin: 0;
+      margin-top: 15px;
+    }*/
+  
+/*    .hdFlex .AddRecord,
+    .hdFlex .AddRecord .btn {
+      width: 100%;
+    }*/
+  
+    .inputarae {
+      display: block !important;
+      width: 100%;
+    }
+  
+    .inputarae input,
+    .inputarae button {
+      width: 100%;
+      display: block;
+      margin: 0 !important;
+      margin-bottom: 10px !important;
+    }
+	/*.Step4From .form-group label {
+		margin-top: 10px;
+	}*/
+	.row.suburl {
+		margin-bottom: 15px;
+	}
+	body {
+		padding: 10px;
+	}
+	.topBar, .inner_main {
+		padding-left: 10px;
+		padding-right: 10px;
+	}
+  
+  }
+
+  #loading-indicator {
+    background-color: rgba(0,0,0,.5);
+    bottom: 0;
+    box-sizing: border-box;
+    font-size: 1px;
+    height: 100%;
+    left: 0;
+    margin: 0!important;
+    padding: 0!important;
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 100%;
+    z-index: 2147483646;
+}
+#loading-indicator::after, #loading-indicator::before {
+    box-sizing: border-box;
+    left: 50%;
+    position: absolute;
+    top: 50%;
+}
+#loading-indicator::before {
+    background: url(../images/loading.gif) center center no-repeat rgba(0,0,0,0);
+    content: "";
+    height: 70px;
+    margin-left: -35px;
+    margin-top: -70px;
+    width: 70px;
+    z-index: 2;
+}
+#loading-indicator::after {
+    background: #fff;
+    border-radius: 5px;
+    color: #000;
+    content: "Processing, one moment please... ";
+    font-family: arial;
+    font-size: 17px;
+    height: 110px;
+    line-height: 98px;
+    margin-left: -150px;
+    margin-top: -75px;
+    padding-top: 35px;
+    text-align: center;
+    width: 300px;
+    z-index: 1;
+}
+body {
+	padding: 0;
+}
+
+
+
+
+
+
+
+
+
+
+.topBar .hdFlex {
+  margin: 0;
+  flex-grow: 1;
+  padding: 10px 0;
+}
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.topBar .hdFlex #filter_menu {
+	margin-right: 10px;
+}
+
+.import_page,.export_ottr {
+	width: calc(100% - 30px);
+	margin: auto;
+	margin-top: 30px;
+	text-align: center;
+	padding: 20px;
+	background-color: #eee;
+	border-radius: 10px;
+	max-width: 600px;
+}
+#download-link {
+	margin-top: 20px;
+}
+.export_ottr ul {
+	text-align: left;
+	margin-top: 20px;
+}
+.export_ottr ul a {
+	color: #000;
+}
+
+
+.sideMenu_ottr ul li a {
+	color: #000;
+}
+.sidebar .IconClick img {
+	mix-blend-mode: exclusion;
+}
+.sidebar {
+	background-color: #acacac;
+}
+  @media screen and (max-width: 991px) {
+		.topBar .hdFlex #filter_menu {
+			max-width: 150px !important;
+		}
+		.topBar .hdFlex .select2-hidden-accessible, .topBar .hdFlex .select2-container {
+	max-width: 150px !important;
+	width: 150px !important;
+}
+
+.topBar .hdFlex .AddRecord button {
+	width: 100px;
+	font-size: 14px;
+	padding: 7.5px 10px;
+}
+
+
+}
+
+
+  @media screen and (max-width: 575px) {
+		.topBar .hdFlex #filter_menu {
+			max-width: 125px !important;
+		}
+		.topBar .hdFlex .select2-hidden-accessible, .topBar .hdFlex .select2-container {
+max-width: 125px !important;
+    width: 125px !important;
+}
+
+.topBar .hdFlex .AddRecord button {
+	width: 100px;
+	font-size: 14px;
+	padding: 7.5px 10px;
+}
+
+#csvForm > button {
+  display: inline-block;
+  width: 200px;
+  margin-top: 15px;
+}
+#csvForm {
+  text-align: center;
+}
+#download-link {
+	margin-top: 10px;
+	width:200px;
+}
+
+}
+
+
+  @media screen and (max-width: 430px) {
+
+  	.topBar .hdFlex {
+	flex-grow: unset;
+}
+.topBar .hdFlex {
+	flex-direction: column;
+}
+
+
+.topBar .hdFlex #filter_menu {
+	max-width: 150px !important;
+	width: 150px !important;
+	margin-right: 0 !important;
+	padding: 7.5px 10px;
+	margin-bottom: 5px;
+}
+		.topBar .hdFlex .select2-hidden-accessible, .topBar .hdFlex .select2-container {
+max-width: 150px !important;
+    width: 150px !important;
+}
+
+.topBar .hdFlex .AddRecord button {
+	width: 150px;
+}
+.topBar .hdFlex .AddRecord {
+	margin-left: 0;
+	margin-top: 5px;
+}
+
+}
