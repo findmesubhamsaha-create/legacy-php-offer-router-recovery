@@ -193,8 +193,9 @@ class Offer
 		$start = $params['start'];
 		$length = $params['length'];
 		$searchValue = $params['search']['value']; // Search value
+		$filterType = $params['filterType'] ?? '';
 
-		if($params['filterType'] == 'Network'){
+		if($filterType == 'Network'){
 			$get_network_id = $this->db->fetch_data_new('tbl_network','id',['network_name'=>$params['filterValue']],1);
 			
 			$totalRecordsQuery = $this->db->filter_query('SELECT COUNT(*) AS total FROM tbl_offer_url WHERE offer_status=1 AND network_id='.$get_network_id[0]["id"].'');
@@ -224,7 +225,7 @@ class Offer
 
 		}
 
-		else if($params['filterType'] == 'Domain'){
+		else if($filterType == 'Domain'){
 
 			$get_offer_id = $this->db->filter_query('SELECT DISTINCT(main_offer_id) FROM `tbl_sub_offer_url` WHERE `sub_url` LIKE "%'.$params['filterValue'].'%" AND  deleted_status="no";');
 			$offer_ids = array_column($get_offer_id, 'main_offer_id');
@@ -255,7 +256,7 @@ class Offer
 
 		}
 
-		else if($params['filterType'] == 'Status'){
+		else if($filterType == 'Status'){
 
 			$offer_status = [
 			    "Active"  => 1,
