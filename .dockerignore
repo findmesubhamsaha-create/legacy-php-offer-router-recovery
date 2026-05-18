@@ -1,0 +1,6 @@
+.git
+.gitignore
+portal/backup/
+portal/docs/
+README_DOCKER.md
+*.log
