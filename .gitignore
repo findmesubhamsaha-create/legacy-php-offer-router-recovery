@@ -1,0 +1,12 @@
+# Environment / secrets — never commit
+.env
+
+# Composer (added when Phase 2.1 is implemented)
+vendor/
+composer.lock
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

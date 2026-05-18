@@ -39,14 +39,9 @@
 
 
 <?php
-// Database connection
-$host = 'localhost'; // Replace with your host
-//$db = 'staging_database'; // Replace with your database name
-$db = 'efbhalvbhdsurl'; // Replace with your database name
-$user = 'admin'; // Replace with your username
-$pass = 'KDms@jY7Gw'; // Replace with your password
+require dirname(__FILE__) . '/../library/Settings.php';
 
-$mysqli = new mysqli($host, $user, $pass, $db);
+$mysqli = new mysqli(DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME);
 
 
 //echo 'in'; die();
