@@ -1,5 +1,8 @@
 FROM php:8.2-apache
 
+RUN echo "error_reporting = E_ALL & ~E_DEPRECATED & ~E_NOTICE" >> /usr/local/etc/php/conf.d/custom.ini \
+ && echo "display_errors = Off" >> /usr/local/etc/php/conf.d/custom.ini
+ 
 # Install mysqli (required by connect.php) and pdo_mysql (forward-compat)
 RUN docker-php-ext-install mysqli pdo_mysql \
     && a2enmod rewrite headers
