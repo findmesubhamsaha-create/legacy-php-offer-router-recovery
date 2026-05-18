@@ -5,6 +5,8 @@ if (!defined('BASEPATH')){
 
 class Upload
 {
+	private $db;
+
 	public function __construct() {
 		$this->db = new Database();
  	}

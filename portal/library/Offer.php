@@ -6,6 +6,8 @@ if (!defined('BASEPATH')){
 //class OfferBeta
 class Offer
 {
+	private $db;
+
 	public function __construct() {
 		$this->db = new Database();
  	}

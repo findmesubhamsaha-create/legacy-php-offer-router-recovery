@@ -1,6 +1,8 @@
 <?php
 class Postback
 {
+	private $db;
+
 	public function __construct() {
 		$this->db = new Database();
  	}

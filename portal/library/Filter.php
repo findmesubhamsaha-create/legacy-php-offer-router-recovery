@@ -5,6 +5,8 @@ if (!defined('BASEPATH')){
 //echo "<pre>";
 class Filter
 {
+	private $db;
+
 	public function __construct() {
 		$this->db = new Database();
  	}
