@@ -104,7 +104,8 @@
                  var csvObjects = dataRows.map(row => {
                      var obj = {};
                      headers.forEach((header, index) => {
-                         obj[header.trim()] = row[index].trim();  // Trim values to remove extra spaces
+                         obj[header.trim()] = (row[index] || '').trim();
+                        //obj[header.trim()] = row[index].trim();  // Trim values to remove extra spaces
                      });
                      return obj;
                  });
