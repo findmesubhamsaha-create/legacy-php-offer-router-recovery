@@ -1,10 +1,9 @@
 <?php
 // error_reporting(E_ALL);
 // ini_set('display_errors', true);
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 session_start();
+ob_start();  // RC-09: buffer output so stray warnings cannot corrupt JSON responses
+header('Content-Type: application/json; charset=utf-8');  // RC-12
 require dirname(__FILE__) . '/library/Settings.php';
 require dirname(__FILE__) . '/library/database/Database.php';
 require dirname(__FILE__) . '/library/User.php';
@@ -18,6 +17,10 @@ require dirname(__FILE__) . '/library/Upload.php';
 
 //print_r($_REQUEST); die();
 
+if (!isset($_REQUEST['requestMethod'])) {
+    echo json_encode(['response' => false, 'message' => 'Missing requestMethod']);
+    exit;
+}
 $requestMethod = $_REQUEST['requestMethod'];
 $username = isset($_REQUEST['username']) ? $_REQUEST['username'] : '';
 $password = isset($_REQUEST['password']) ? $_REQUEST['password'] : '';
@@ -148,7 +151,7 @@ function fetchAllData($params = array()){
 	}
 	else{
 		$output = array(
-			"data"    => ''
+			"data"    => []
 		);
 		echo json_encode($output);
 	}
@@ -269,7 +272,7 @@ function fetchReport($params = array()){
 	}
 	else{
 		$output = array(
-			"data"    => ''
+			"data"    => []
 		);
 		echo json_encode($output);
 	}
@@ -368,7 +371,7 @@ function getSubOffers($params = array()){
 	}
 	else{
 		$output = array(
-			"data"    => ''
+			"data"    => []
 		);
 		echo json_encode($output);
 	}

@@ -16,7 +16,9 @@ class Database{
 
         $this->conn = new mysqli($this->dbHost,$this->dbUser,$this->dbPass,$this->dbName);
         if ($this->conn->connect_error) {
-            die("Connection failed: " . $this->conn->connect_error);
+            if (ob_get_level() > 0) { ob_end_clean(); }
+            echo json_encode(['response' => false, 'message' => 'Database connection failed']);
+            exit;
         }
     }
 
@@ -25,7 +27,7 @@ class Database{
 		$key = array_keys($info);
 	    $val = array_values($info);
 	    $sql = "INSERT INTO ".$table." (" . implode(', ', $key) . ") ". "VALUES ('" . implode("', '", $val) . "')";
-	    if ($this->conn->query($sql) === TRUE) 
+	    if ($this->conn->query($sql) === TRUE)
             $insert_id = $this->conn->insert_id;
 		return $insert_id ;
 	}
@@ -106,7 +108,7 @@ class Database{
 
 		if($result)
 		{
-			if($result->num_rows > 0) 
+			if($result->num_rows > 0)
 			{
 				while($row = $result->fetch_assoc())
 				{
@@ -197,23 +199,24 @@ class Database{
 	    // }
 
 	    // $sql = "UPDATE ".$table." SET " . implode(', ', $cols) . " WHERE " . implode(' AND ', $where);
-			    
-	    if($this->conn->query($sql) === TRUE) 
+
+	    if($this->conn->query($sql) === TRUE) {
 			return 1;
-		else
+		} else {
 			return 0;
+		}
 
 		//$this->conn->close();
 	}
 
 	public function join_query($sql){
-		//echo $sql;  
+		//echo $sql;
+		$return = [];
 		 $result = $this->conn->query($sql);
-
 
 		if($result)
 		{
-			if($result->num_rows > 0) 
+			if($result->num_rows > 0)
 			{
 				while($row = $result->fetch_assoc())
 				{
@@ -228,12 +231,12 @@ class Database{
 
 	public function filter_query($sql){
 		//echo $sql;  die();
+		$return = [];
 		 $result = $this->conn->query($sql);
-
 
 		if($result)
 		{
-			if($result->num_rows > 0) 
+			if($result->num_rows > 0)
 			{
 				while($row = $result->fetch_assoc())
 				{
@@ -243,6 +246,19 @@ class Database{
 		}
 		//print_r($return); die();
 		return $return;
+	}
+
+	// RC-05: transaction support for atomic multi-table imports
+	public function begin_transaction() {
+		$this->conn->begin_transaction();
+	}
+
+	public function commit() {
+		$this->conn->commit();
+	}
+
+	public function rollback() {
+		$this->conn->rollback();
 	}
 
 }

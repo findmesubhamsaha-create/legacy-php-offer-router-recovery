@@ -199,7 +199,7 @@ class Offer
 
 		if($filterType == 'Network'){
 			$get_network_id = $this->db->fetch_data_new('tbl_network','id',['network_name'=>$params['filterValue']],1);
-			
+
 			$totalRecordsQuery = $this->db->filter_query('SELECT COUNT(*) AS total FROM tbl_offer_url WHERE offer_status=1 AND network_id='.$get_network_id[0]["id"].'');
 			$totalRecords = $totalRecordsQuery[0]['total'];
 
@@ -266,28 +266,33 @@ class Offer
 			    "Deleted" => 3
 			];
 
-			$totalRecordsQuery = $this->db->filter_query('SELECT COUNT(*) AS total FROM tbl_offer_url WHERE offer_status= '.$offer_status[$params['filterValue']].'');
-			$totalRecords = $totalRecordsQuery[0]['total'];
+			// 'All' is not in $offer_status → null means no status restriction
+			$status_id    = $offer_status[$params['filterValue']] ?? null;
+			$status_where = ($status_id !== null) ? ' WHERE offer_status=' . $status_id : '';
+			$status_and   = ($status_id !== null) ? " AND a.offer_status='" . $status_id . "'" : '';
+
+			$totalRecordsQuery = $this->db->filter_query('SELECT COUNT(*) AS total FROM tbl_offer_url' . $status_where);
+			$totalRecords = $totalRecordsQuery[0]['total'] ?? 0;
 
 			//return $totalRecordsQuery;
 
 			if(!empty($searchValue)){
-			    $searchQuery = " WHERE (a.offer LIKE '%" . $searchValue . "%' OR a.slug_name LIKE '%" . $searchValue . "%' OR b.tag_name LIKE '%" . $searchValue . "%' OR a.note LIKE '%" . $searchValue . "%' OR c.network_name LIKE '%" . $searchValue . "%') AND a.offer_status='" . $offer_status[$params['filterValue']] . "'";
+			    $searchQuery = " WHERE (a.offer LIKE '%" . $searchValue . "%' OR a.slug_name LIKE '%" . $searchValue . "%' OR b.tag_name LIKE '%" . $searchValue . "%' OR a.note LIKE '%" . $searchValue . "%' OR c.network_name LIKE '%" . $searchValue . "%')" . $status_and;
 			}
 			else{
-				$searchQuery = ' WHERE a.offer_status='.$offer_status[$params['filterValue']].'';
+				$searchQuery = ($status_id !== null) ? ' WHERE a.offer_status=' . $status_id : '';
 			}
 
 			//return $searchQuery;
 
-			$totalFilteredRecordsQuery = $this->db->join_query('select COUNT(*) total from tbl_offer_url a 
+			$totalFilteredRecordsQuery = $this->db->join_query('select COUNT(*) total from tbl_offer_url a
 								left join tbl_tag b on a.tag_id=b.id
 								left join tbl_network c on a.network_id=c.id' . $searchQuery.'');
-			
-			$totalFilteredRecords = $totalFilteredRecordsQuery[0]['total'];
+
+			$totalFilteredRecords = $totalFilteredRecordsQuery[0]['total'] ?? 0;
 
 			// //return $totalFilteredRecordsQuery;
-			$final_offer_list = $this->db->join_query('select a.*, b.tag_name, c.network_name, COUNT(d.offer_id) clicks from tbl_offer_url a 
+			$final_offer_list = $this->db->join_query('select a.*, b.tag_name, c.network_name, COUNT(d.offer_id) clicks from tbl_offer_url a
 							left join tbl_tag b on a.tag_id=b.id
 							left join tbl_network c on a.network_id=c.id
 							left join tbl_click d on a.id=d.offer_id '.$searchQuery.' GROUP BY a.id ORDER BY a.id ASC LIMIT '.$start.', '.$length.'');
@@ -521,14 +526,14 @@ class Offer
 			$check_sub_offer_del = $this->db->fetch_data_new('tbl_sub_offer_url','GROUP_CONCAT(sub_url,"") sub_url',[ 
 					'main_offer_id'=>$offerId]);
 
-			$prev_sub_url_del = explode(',', $check_sub_offer_del[0]['sub_url']);
+			$prev_sub_url_del = explode(',', $check_sub_offer_del[0]['sub_url'] ?? '');
 			$deleted_url = array_diff($prev_sub_url_del, $param['suburl']['url']);
 			$update_sub = $this->db->update_data('tbl_sub_offer_url',['deleted_status'=>'yes', 'weight'=>0, 'status'=>'no'],'sub_url in ("'.implode('","', $deleted_url).'") AND main_offer_id = '.$offerId);
 
 			$check_sub_offer = $this->db->fetch_data_new('tbl_sub_offer_url','GROUP_CONCAT(CONCAT(sub_url,"-",deleted_status),"") sub_url',[ 
 					'main_offer_id'=>$offerId]); //'deleted_status'=>'no'
 			
-			$prev_sub_url = explode(',', $check_sub_offer[0]['sub_url']);
+			$prev_sub_url = explode(',', $check_sub_offer[0]['sub_url'] ?? '');
 			
 			// echo "<pre>"; 
 			// print_r($param); die();

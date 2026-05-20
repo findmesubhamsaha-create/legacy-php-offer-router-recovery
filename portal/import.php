@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
    <head>
       <meta charset="UTF-8">
@@ -123,23 +123,19 @@
                      type: 'POST',
                      //data: { csvData: rows },
                      data: { csvData: JSON.stringify(csvObjects), requestMethod: 'importOffer' },
-                     success: function(responseString) {
-                         //alert(responseString);
-                         //console.log(response);
-         
-                         // Parse the JSON data
-                         // Parse the outer JSON
-                         // Parse the outer JSON
-                         // Parse the outer JSON
-                         var outerResponse = JSON.parse(responseString);
-         
-                         // Extract and parse the nested message as JSON
+                     success: function(responseRaw) {
+                         // jQuery auto-parses when Content-Type is application/json; handle both cases
+                         var outerResponse = (typeof responseRaw === 'string') ? JSON.parse(responseRaw) : responseRaw;
+
+                         // message field is a JSON string from uploadOffer() — parse it
                          var responseData;
                          try {
-                             responseData = JSON.parse(outerResponse.message);
+                             responseData = (typeof outerResponse.message === 'string')
+                                 ? JSON.parse(outerResponse.message)
+                                 : outerResponse.message;
                          } catch (e) {
-                             console.error("Failed to parse nested JSON:", e);
-                             showInModal("An unexpected error occurred.");
+                             console.error("Failed to parse nested JSON:", e, outerResponse);
+                             showInModal("An unexpected error occurred parsing the server response.");
                              return;
                          }
          

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!defined('BASEPATH')){
     exit('Direct script access is not allowed!');
 }
@@ -24,6 +24,9 @@ class Upload
 		        $weight_columns = [];
 		        $status_columns = [];
 		        $offer_name_column = '';
+		        $slug_name_column = '';
+		        $start_date_column = '';
+		        $end_date_column = '';
 
 		        foreach ($headers as $header) {
 		            if (stripos($header, 'url') !== false) {
@@ -74,14 +77,27 @@ class Upload
 		            $row_has_error = false;
 		        	$error_reason = [];
 		            //$outputArray = [];
+		            // RC-07: extract offer-level dates from first row only — prevents last-row value leakage
+		            $first_row_data = $offer_rows[0]['data'] ?? [];
+		            $start_date     = $first_row_data['start date'] ?? '';
+		            $end_date       = $first_row_data['end date'] ?? '';
+		            $current_date   = date('Y-m-d');
+		            if (empty($start_date)) {
+		                $start_date = $current_date;
+		            } elseif (!$this->validateDate($start_date)) {
+		                $errors[] = ['row' => 'Offer: ' . $offer_name, 'offer' => $offer_name, 'error' => "Invalid Start Date: $start_date."];
+		            }
+		            if (empty($end_date)) {
+		                $end_date = $current_date;
+		            } elseif (!$this->validateDate($end_date)) {
+		                $errors[] = ['row' => 'Offer: ' . $offer_name, 'offer' => $offer_name, 'error' => "Invalid End Date: $end_date."];
+		            }
 
 
 		        	foreach ($offer_rows as $key => $values) {
 
 		        		$offer_name = trim($values['data']['offer name'] ?? '');
 		            	$slug_name = trim($values['data']['slug name'] ?? '');
-		            	$start_date = $values['data']['start date'] ?? '';
-		            	$end_date = $values['data']['end date'] ?? '';
 
 		            	//Validate Offer Name and Slug Name
 			            if (empty($offer_name)) {
@@ -93,21 +109,6 @@ class Upload
 			                $row_has_error = true;
 			            }
 
-			            // // Validate and handle date fields
-			            $current_date = date('Y-m-d');
-			            if (empty($start_date)) {
-			                $start_date = $current_date; // Set to current date if empty
-			            } elseif (!$this->validateDate($start_date)) {
-			                $error_reason[] = "Invalid Start Date: $start_date.";
-			                $row_has_error = true;
-			            }
-
-			            if (empty($end_date)) {
-			                $end_date = $current_date; // Set to current date if empty
-			            } elseif (!$this->validateDate($end_date)) {
-			                $error_reason[] = "Invalid End Date: $end_date.";
-			                $row_has_error = true;
-			            }
 				        
 				        //print_r($values);  // Prints the array of row data
 				    }
@@ -117,14 +118,19 @@ class Upload
 		            foreach ($offer_rows as $row_info) {
 		                $row = $row_info['data'];
 		                $row_number = $row_info['row_number'];
-		                // $row_has_error = false;
-		                // $error_reason = [];
+		                $row_has_error = false;  // RC-06: reset per-row to prevent error state leakage
+		                $error_reason = [];
 
 		                // Loop through URL, Weight, and Status columns
 		                for ($i = 0; $i < count($url_columns); $i++) {
-		                    $url = $row[$url_columns[$i]] ?? null;
-		                    $weight = $row[$weight_columns[$i]] ?? null;
-		                    $status = $row[$status_columns[$i]] ?? null;
+		                    $url    = trim((string)($row[$url_columns[$i]] ?? ''));
+		                    $weight = trim((string)($row[$weight_columns[$i]] ?? ''));
+		                    $status = trim((string)($row[$status_columns[$i]] ?? ''));
+
+		                    // Skip optional URL slots where all three fields are absent
+		                    if ($url === '' && $weight === '' && $status === '') {
+		                        continue;
+		                    }
 
 		                    // Validate the URL
 		                    if ($url && !filter_var($url, FILTER_VALIDATE_URL)) {
@@ -137,7 +143,9 @@ class Upload
 		                        $error_reason[] = "Duplicate URL within the same offer: $url";
 		                        $row_has_error = true;
 		                    }
-		                    $offer_urls[] = $url;
+		                    if ($url !== '') {
+		                        $offer_urls[] = $url;
+		                    }
 
 		                    // Add weight only if the status is 'yes'
 		                    if (strtolower($status) === 'yes') {
@@ -214,6 +222,10 @@ class Upload
 				                ];
 							}
 							else{
+								$urls = [];
+								$weights = [];
+								$statuses = [];
+								$outputArray = [];
 								foreach ($valid_row as $key => $value) {
 								    if (strpos($key, 'url') === 0) {
 								        $urls[] = $value; // Collect URLs
@@ -242,18 +254,41 @@ class Upload
 									'end_date'=>$end_date
 								);
 								//print_r($main_url_record); die();
-								$add_offer = $this->db->save_data(DB_OFFER_TABLE,$main_url_record);
-								if(!empty($add_offer)){
-									for ($x = 0; $x < count($outputArray['url']); $x++) {
-										$sub_url_record = array(
-												'main_offer_id'=>$add_offer,
-												'sub_url'=>$this->trimmString($outputArray['url'][$x]),
-												'weight'=>$outputArray['weight'][$x],
-												'status'=>$outputArray['status'][$x]
-											);
-										$add_sub_offer = $this->db->save_data('tbl_sub_offer_url',$sub_url_record);
+								// RC-05: atomic transaction for main + sub-offer inserts
+								$this->db->begin_transaction();
+								try {
+									$add_offer = $this->db->save_data(DB_OFFER_TABLE, $main_url_record);
+									if (empty($add_offer)) {
+										throw new \RuntimeException('Main offer insert failed');
 									}
+									for ($x = 0; $x < count($outputArray['url']); $x++) {
+										$u = trim((string)($outputArray['url'][$x] ?? ''));
+										$s = trim((string)($outputArray['status'][$x] ?? ''));
+										$w = trim((string)($outputArray['weight'][$x] ?? ''));
+										// Skip optional empty URL slots — prevents ENUM/NOT NULL constraint errors
+										if ($u === '' || $s === '' || $w === '') {
+										    continue;
+										}
+										$sub_url_record = array(
+										    'main_offer_id' => $add_offer,
+										    'sub_url'       => $u,
+										    'weight'        => (float)$w,
+										    'status'        => $s
+										);
+										$add_sub_offer = $this->db->save_data('tbl_sub_offer_url', $sub_url_record);
+										if (empty($add_sub_offer)) {
+										    throw new \RuntimeException('Sub-offer insert failed at index ' . $x);
+										}
+									}
+									$this->db->commit();
 									$inserted_rows++;
+								} catch (\Exception $e) {
+									$this->db->rollback();
+									$errors[] = [
+										'row'   => 'Offer: ' . $offer_name,
+										'offer' => $offer_name,
+										'error' => 'Database error: ' . $e->getMessage()
+									];
 								}
 							}
 		                }

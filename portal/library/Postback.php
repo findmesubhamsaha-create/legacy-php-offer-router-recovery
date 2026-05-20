@@ -44,11 +44,12 @@ class Postback
 
 	public function get_link_to_display($sites){
 			$rand = rand(0,100-1);
+			$weight = null;
 			foreach($sites as $site=>$weight) {
 			    $rand -= $weight['weight'];
 			    if( $rand < 0) break;
 			}
-			return $weight['sub_url'];
+			return $weight['sub_url'] ?? null;
 	}
 }
 ?>
