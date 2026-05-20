@@ -1,4 +1,12 @@
-﻿<!DOCTYPE html>
+<?php
+// SHV1-03: require authenticated session
+session_start();
+if (!isset($_SESSION['is_login']) || $_SESSION['is_login'] !== true) {
+    header('Location: index.php');
+    exit;
+}
+?>
+<!DOCTYPE html>
 <html lang="en">
    <head>
       <meta charset="UTF-8">

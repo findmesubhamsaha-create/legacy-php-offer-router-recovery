@@ -22,6 +22,16 @@ if (!isset($_REQUEST['requestMethod'])) {
     exit;
 }
 $requestMethod = $_REQUEST['requestMethod'];
+
+// SHV1-02: require authenticated session for all non-public methods
+$public_methods = ['login', 'resetPassword'];
+if (!in_array($requestMethod, $public_methods, true)) {
+    if (!isset($_SESSION['is_login']) || $_SESSION['is_login'] !== true) {
+        echo json_encode(['response' => false, 'message' => 'Unauthorized']);
+        exit;
+    }
+}
+
 $username = isset($_REQUEST['username']) ? $_REQUEST['username'] : '';
 $password = isset($_REQUEST['password']) ? $_REQUEST['password'] : '';
 // $username = $_REQUEST['username'];
@@ -89,6 +99,7 @@ function userLogin($params = array())
 	// print_r($validate_user);
 	
 	if($validate_user){
+		session_regenerate_id(true);  // SHV1-01: prevent session fixation
 		$_SESSION["is_login"] = true;
 		echo json_encode(array('response'=>true, 'message'=>'Successfully Login!.'));
 	}
