@@ -18,10 +18,11 @@ require dirname(__FILE__) . '/library/Settings.php';
    <link  rel="shortcut icon" type="image/x-icon" href="favicon.png" />
    <link rel="apple-touch-icon" href="app-icon.png"/>
       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-      <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700&display=swap" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
       <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"> -->
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
       <link rel="stylesheet" href="assets/css/dashboard_style.css">
+      <link rel="stylesheet" href="assets/css/modern.css">
       <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.css">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.css">
 
@@ -364,7 +365,7 @@ button.view_icon_btn.btn_report {
                      <div class="col-xs-12 col-sm-3">
                         <div class="form-group">
                            <label for="Note">Notes</label>
-                           <textarea style="" name="note" class="form-control" placeholder="Add Note" id="Note"  data-error="Please enter note"></textarea>
+                           <textarea name="note" class="form-control" placeholder="Add Note" id="Note"  data-error="Please enter note"></textarea>
                         </div>
                      </div>
                      <div class="col-xs-12 col-sm-3">
@@ -450,8 +451,8 @@ button.view_icon_btn.btn_report {
 
 
    <!-- Modal -->
-   <div class="modal Step4From" id="clickexampleModal" tabindex="-1" aria-labelledby="clickexampleModalLabel"
-      aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+   <div class="modal fade Step4From" id="clickexampleModal" tabindex="-1" aria-labelledby="clickexampleModalLabel"
+      aria-hidden="true">
       <div class="modal-dialog">
          <div class="modal-content">
             <div class="modal-header">
@@ -481,8 +482,8 @@ button.view_icon_btn.btn_report {
 
 
    <!-- Offer Hover Modal -->
-   <div class="modal Step4From" id="offerhovereModal" tabindex="-1" aria-labelledby="offerhoverModalLabel"
-      aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+   <div class="modal fade Step4From" id="offerhovereModal" tabindex="-1" aria-labelledby="offerhoverModalLabel"
+      aria-hidden="true">
       <div class="modal-dialog">
          <div class="modal-content">
             <div class="modal-header">
@@ -509,18 +510,14 @@ button.view_icon_btn.btn_report {
    </div>
    <!-- Offer Hover Modal End -->
 
+   <div id="m-toast-container" aria-live="polite" aria-atomic="true"></div>
    <p id="loading-indicator" style="display:none;">Processing...</p>
 
    <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
-   <script type="text/javascript" src="https://cdn.datatables.net/1.10.8/js/jquery.dataTables.min.js"></script>
-
-   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
    <script type="text/javascript" src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
    <script type="text/javascript" src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.js"></script>
    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.js"></script>
-   <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
 
    
    <script type="text/javascript">
@@ -531,6 +528,28 @@ button.view_icon_btn.btn_report {
 
 
 <script>
+   function showToast(type, title, body) {
+      var icons = {
+         success: 'fa-check-circle',
+         warning: 'fa-exclamation-circle',
+         danger:  'fa-times-circle',
+         info:    'fa-info-circle'
+      };
+      var id = 'toast_' + Date.now();
+      var html = '<div id="' + id + '" class="toast m-toast m-toast-' + type + '" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4500">'
+         + '<div class="toast-header">'
+         + '<i class="fas ' + (icons[type] || icons.info) + ' me-2"></i>'
+         + '<strong class="me-auto">' + title + '</strong>'
+         + '<button type="button" class="btn-close btn-close-sm ms-2" data-bs-dismiss="toast" aria-label="Close"></button>'
+         + '</div>'
+         + (body ? '<div class="toast-body">' + body + '</div>' : '')
+         + '</div>';
+      $('#m-toast-container').append(html);
+      var toastEl = document.getElementById(id);
+      bootstrap.Toast.getOrCreateInstance(toastEl).show();
+      $(toastEl).on('hidden.bs.toast', function () { $(this).remove(); });
+   }
+
    $('.btn-close').on('click',function(e) {
       if ($(e.target).attr("class") != "addeddom") $(".addeddom").remove();
       $('[name=checkoffer]').val(0);
@@ -727,10 +746,7 @@ button.view_icon_btn.btn_report {
 
       $("body").on("change", ".sublink", function () {
          if(!isUrlValid($(this).val())){
-            $.alert({
-               title: 'Warning!',
-               content: 'enter valid sub URL',
-            });
+            showToast('warning', 'Warning', 'Enter a valid sub URL');
             $(this).val('');
          }
          else{
@@ -741,10 +757,7 @@ button.view_icon_btn.btn_report {
                 if (recipientsArray[i + 1] == recipientsArray[i] && recipientsArray[i + 1] != '') {
                      // $(this).parents(".suburl").remove();
                      $(this).val('');
-                     $.alert({
-                        title: 'Warning!',
-                        content: 'Sub Url already added!',
-                     });
+                     showToast('warning', 'Warning', 'Sub URL already added!');
                 }
                 else{
                   console.log('out');
@@ -794,10 +807,7 @@ button.view_icon_btn.btn_report {
       
             if(error){
                //$('#loading-indicator').fadeOut();
-               $.alert({
-                  title: 'Warning!',
-                  content: error,
-               });
+               showToast('warning', 'Validation Error', error);
             }
             else{
                $('#loading-indicator').fadeIn();
@@ -811,10 +821,7 @@ button.view_icon_btn.btn_report {
                         //dataTable.ajax.reload();
                         if(data.response == true){
                            dataTable.ajax.reload(function() {
-                              $.alert({
-                              title: 'Success!',
-                              content: 'Data added successfully!',
-                           });
+                              showToast('success', 'Success', 'Data added successfully!');
                            $("#exampleModal").modal('hide');
                            $(".btn-close").click();
                            $('#loading-indicator').fadeOut();
@@ -824,10 +831,7 @@ button.view_icon_btn.btn_report {
                         }
                         else{
                            $('#loading-indicator').fadeOut();
-                           $.alert({
-                              title: 'Warning!',
-                              content: data.message,
-                           });
+                           showToast('warning', 'Warning', data.message);
                         }
                         //console.log(data);
                   }
@@ -1296,47 +1300,39 @@ button.view_icon_btn.btn_report {
 
 
 
-/*================================================ Hover Offer Feature =========================================== */
+/*================================================ Sub-Offer Modal (click-triggered) =========================================== */
 
-   //$('.hover-element').mouseenter(function(e) {
-   $("body").on("mouseenter", ".offer_name", function () {
-   //$("body").on("click", ".offer_name", function () {
-      var spanVal = $(this).closest('td').nextAll('td').find('span').attr('value');
-         //console.log($(this).closest('td').nextAll('td').find('span').attr('value'));
-         $("#offerhovereModal").show();
+   /* data-bs-toggle="modal" on .offer_name cells (set in createdRow) handles click-to-open.
+      Bootstrap fires show.bs.modal with e.relatedTarget = the clicked td. */
+   $('#offerhovereModal').on('show.bs.modal', function (e) {
+      var triggerEl = $(e.relatedTarget);
+      var spanVal   = triggerEl.nextAll('td').find('span').attr('value');
 
-         $("#offerhover-tbl").DataTable().destroy();
+      if ($.fn.DataTable.isDataTable('#offerhover-tbl')) {
+         $('#offerhover-tbl').DataTable().destroy();
+      }
 
-         var reportTable = $("#offerhover-tbl").DataTable({
-            "processing":true,
-            "serverSide":false,
-            "order":[],
-            "ajax":{
-               url:"ajax.php",
-               method:"POST",
-               data: {requestMethod: 'getSubOffers', oid: spanVal},
-            },
-            // "coloumnDefs":[{
-            //    "target":[7],
-            //    "orderable":false
-            // }],
-            "pageLength": 100,
-            "autoWidth": false,
-         });
-        
-    });
+      $('#offerhover-tbl').DataTable({
+         "processing":  true,
+         "serverSide":  false,
+         "order":       [],
+         "ajax": {
+            url:    "ajax.php",
+            method: "POST",
+            data:   { requestMethod: 'getSubOffers', oid: spanVal },
+         },
+         "pageLength": 100,
+         "autoWidth":  false,
+      });
+   });
 
-    //$('.hover-element').mouseleave(function() {
-   
-    // $("body").on("mouseleave", ".offer_name", function () {
-      $("body").on("click", ".close-hover-modal", function () {
-         //console.log('out the offer');
-         $("#offerhovereModal").hide();
-        //$('.popup').fadeOut();
-    });
+   $('#offerhovereModal').on('hidden.bs.modal', function () {
+      if ($.fn.DataTable.isDataTable('#offerhover-tbl')) {
+         $('#offerhover-tbl').DataTable().destroy();
+      }
+   });
 
-
-/*================================================ Hover Offer Feature =========================================== */
+/*================================================ Sub-Offer Modal End =========================================== */
 
 
 
@@ -1351,8 +1347,7 @@ button.view_icon_btn.btn_report {
          copyText.select();
          copyText.setSelectionRange(0, 99999);
          navigator.clipboard.writeText(copyText.value);
-         // $.confirm({title: 'Copied!', autoClose: 'OK|1000', content: "URL copied : " + copyText.value });
-         $.confirm({title: 'Copied!', content: "URL copied : " + copyText.value });
+         showToast('success', 'Copied!', 'URL copied to clipboard');
    });
 
 
@@ -1381,7 +1376,7 @@ button.view_icon_btn.btn_report {
                      success: function(data){
                         //console.log(data);
                         dataTable.ajax.reload(function() {
-                           $.alert('Offer Archived!');
+                           showToast('success', 'Archived', 'Offer archived successfully');
                            $(".btn-close").click();
                            $('#loading-indicator').fadeOut();
                         }, false);
@@ -1416,7 +1411,7 @@ button.view_icon_btn.btn_report {
                      success: function(data){
                         //console.log(data);
                          dataTable.ajax.reload(function() {
-                           $.alert('Offer Deleted!');
+                           showToast('success', 'Deleted', 'Offer deleted successfully');
                            $(".btn-close").click();
                            $('#loading-indicator').fadeOut();
                         }, false);
@@ -1456,7 +1451,7 @@ button.view_icon_btn.btn_report {
                dataTable.ajax.reload(function() {
                   //$(".table-responsive").html(data3);
                   $('#loading-indicator').fadeOut();
-                  $.alert(data.message);
+                  showToast('info', 'Reset', data.message);
                }, false);
                //console.log(data.message);
             }

@@ -18,6 +18,7 @@ if (!isset($_SESSION['is_login']) || $_SESSION['is_login'] !== true) {
       <!-- Bootstrap JS (with Popper) -->
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
       <link rel="stylesheet" href="assets/css/dashboard_style.css?v=<?=time()?>">
+      <link rel="stylesheet" href="assets/css/modern.css">
    </head>
    <body>
       <div class="main closeBar" id="mainArea">
