@@ -23,6 +23,7 @@ require dirname(__FILE__) . '/library/Settings.php';
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
       <link rel="stylesheet" href="assets/css/dashboard_style.css">
       <link rel="stylesheet" href="assets/css/modern.css">
+      <link rel="stylesheet" href="assets/css/design-system-v2.css">
       <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.css">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.css">
 
@@ -98,36 +99,6 @@ require dirname(__FILE__) . '/library/Settings.php';
              background-size: contain;
              background-repeat: no-repeat;
          }
-         .dropdown {
-           position: relative;
-           display: inline-block;
-         }
-         .dropdown-content {
-             display: none;
-             position: absolute;
-             background-color: #f1f1f1;
-             min-width: 160px;
-             overflow: auto;
-             box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-             z-index: 1;
-             right: 0;
-         }
-         .dropdown a:hover {background-color: #ddd;}
-         .show {display: block;}
-         .sub_menu {background: #c5dcff;}
-         .sub_menu ul{list-style:none; margin:0 0; padding:0 0;}
-         .sub_menu ul li{list-style:none; margin:0 0; padding:0 0;}
-         .sub_menu ul li {
-             border-bottom: 1px solid #c5c5c5;
-            background: #c5dcff;
-            text-align: left;
-         }
-         .sub_menu ul li:hover{background:#fff;}
-         .sub_menu ul li:last-child{border:none;}
-         .sub_menu ul li button{width:auto; text-align: left; font-size: 14px;}
-         .sub_menu ul li button span.sting_icon {
-             margin-right: 5px;
-         }
 
          @media only screen and (max-width:540px) {
             button.setting, button.clone, button.link {
@@ -173,6 +144,8 @@ button.view_icon_btn.btn_report {
          <button id="open_sidebar" class="IconClick">
             <img src="assets/images/menu.png" alt="">
          </button>
+         <span class="ds2-topbar-title">Offers</span>
+         <span class="ds2-topbar-live"><span class="ds2-live-dot"></span> Live</span>
 
           <div class="hdFlex">
                <select style="max-width:300px;" class="form-select form-select-sm" name="offer_filter" id="filter_menu">
@@ -204,21 +177,25 @@ button.view_icon_btn.btn_report {
          <div class="sideMenu_ottr">
             <ul class="">
                <li>
-                  <a href="<?= BASE_URL ?>/portal/import.php">
-                     Import
-                  </a>
-               </li>
-               <li>
-                  <a href="<?= BASE_URL ?>/portal/export/">
-                     Export
+                  <a href="<?= BASE_URL ?>/portal/dashboard.php">
+                     <i class="fas fa-th-list ds2-nav-icon"></i> Offers
                   </a>
                </li>
                <li>
                   <a href="<?= BASE_URL ?>/portal/analytics.php">
-                     Analytics
+                     <i class="fas fa-chart-bar ds2-nav-icon"></i> Analytics
                   </a>
                </li>
-
+               <li>
+                  <a href="<?= BASE_URL ?>/portal/import.php">
+                     <i class="fas fa-file-import ds2-nav-icon"></i> Import
+                  </a>
+               </li>
+               <li>
+                  <a href="<?= BASE_URL ?>/portal/export/">
+                     <i class="fas fa-file-export ds2-nav-icon"></i> Export
+                  </a>
+               </li>
             </ul>
 
          </div>
@@ -644,10 +621,23 @@ button.view_icon_btn.btn_report {
                // }
             },
             "createdRow": function(row, data, dataIndex) {
-                 // Add a class to the first <td> element (you can adjust the index)
-                  $('td:eq(1)', row).addClass('offer_name');
-                  $('td:eq(1)', row).attr('data-bs-toggle', 'modal');
-                  $('td:eq(1)', row).attr('data-bs-target', '#offerhovereModal');
+                  var $td = $('td:eq(1)', row);
+                  $td.addClass('offer_name');
+                  $td.attr('data-bs-toggle', 'modal');
+                  $td.attr('data-bs-target', '#offerhovereModal');
+
+                  // Row fade-in staggered animation
+                  $(row).addClass('ds2-row-animate');
+                  $(row).css('animation-delay', Math.min(dataIndex * 0.025, 0.4) + 's');
+
+                  // Route preview hover card
+                  var slugName = data[2] || '';
+                  var clicks   = data[6] || '0';
+                  $td.append('<div class="ds2-route-card">'
+                     + '<div class="ds2-route-card-title">Route Preview</div>'
+                     + '<div class="ds2-route-card-row"><span>Slug</span><span>' + $('<span>').text(slugName).html() + '</span></div>'
+                     + '<div class="ds2-route-card-row"><span>All-time clicks</span><span>' + parseInt(clicks || 0).toLocaleString() + '</span></div>'
+                     + '</div>');
              },
              // Listen to the processing event
             // "columns": [
@@ -675,6 +665,21 @@ button.view_icon_btn.btn_report {
          //            $('body').removeClass('blurred-background');
          //        }
          //    });
+
+         // Flip route preview card to left edge when offer name cell is in
+         // the right half of the viewport so the card never overflows off-screen.
+         dataTable.on('draw.dt', function () {
+            $('#example').find('td.offer_name').each(function () {
+               var card = $(this).find('.ds2-route-card');
+               if (!card.length) return;
+               var tdRect = this.getBoundingClientRect();
+               if (tdRect.left > window.innerWidth * 0.5) {
+                  card.css({ left: 'auto', right: '0' });
+               } else {
+                  card.css({ left: '0', right: 'auto' });
+               }
+            });
+         });
       });
 
 /*======================================= End Of Fetch Data ========================================== */
@@ -1257,10 +1262,23 @@ button.view_icon_btn.btn_report {
                // }
             },
             "createdRow": function(row, data, dataIndex) {
-                 // Add a class to the first <td> element (you can adjust the index)
-                  $('td:eq(1)', row).addClass('offer_name');
-                  $('td:eq(1)', row).attr('data-bs-toggle', 'modal');
-                  $('td:eq(1)', row).attr('data-bs-target', '#offerhovereModal');
+                  var $td = $('td:eq(1)', row);
+                  $td.addClass('offer_name');
+                  $td.attr('data-bs-toggle', 'modal');
+                  $td.attr('data-bs-target', '#offerhovereModal');
+
+                  // Row fade-in staggered animation
+                  $(row).addClass('ds2-row-animate');
+                  $(row).css('animation-delay', Math.min(dataIndex * 0.025, 0.4) + 's');
+
+                  // Route preview hover card
+                  var slugName = data[2] || '';
+                  var clicks   = data[6] || '0';
+                  $td.append('<div class="ds2-route-card">'
+                     + '<div class="ds2-route-card-title">Route Preview</div>'
+                     + '<div class="ds2-route-card-row"><span>Slug</span><span>' + $('<span>').text(slugName).html() + '</span></div>'
+                     + '<div class="ds2-route-card-row"><span>All-time clicks</span><span>' + parseInt(clicks || 0).toLocaleString() + '</span></div>'
+                     + '</div>');
              },
             "coloumnDefs":[{
                "target":[7],
@@ -1269,6 +1287,20 @@ button.view_icon_btn.btn_report {
             "pageLength": 50,
             "lengthMenu": [50, 100, 250, 500, 1000],
             "autoWidth": false,
+         });
+
+         // Viewport-edge flip for route preview cards after each redraw
+         dataTable.on('draw.dt', function () {
+            $('#example').find('td.offer_name').each(function () {
+               var card = $(this).find('.ds2-route-card');
+               if (!card.length) return;
+               var tdRect = this.getBoundingClientRect();
+               if (tdRect.left > window.innerWidth * 0.5) {
+                  card.css({ left: 'auto', right: '0' });
+               } else {
+                  card.css({ left: '0', right: 'auto' });
+               }
+            });
          });
       });
 
@@ -1521,24 +1553,110 @@ button.view_icon_btn.btn_report {
 
    </script>
 
-   <script>
-   function myFunction(oid) {
-     document.getElementById("myDropdown_"+oid).classList.toggle("show");
+   <style>
+   /* ── DS2 Action Menu ─────────────────────────────────────────────── */
+   #ds2-action-menu {
+     flex-direction: column;
+     padding:        8px;
+     box-shadow:     0 12px 28px rgba(0,0,0,.10) !important;
    }
+   .ds2-menu-btn {
+     display:         flex;
+     align-items:     center;
+     gap:             10px;
+     width:           100%;
+     height:          42px;
+     padding:         0 12px;
+     border:          none;
+     border-radius:   8px;
+     font-size:       14px;
+     font-weight:     500;
+     font-family:     inherit;
+     text-align:      left;
+     white-space:     nowrap;
+     cursor:          pointer;
+     background:      transparent;
+     color:           #4b5563;
+     transition:      background .15s ease, color .15s ease;
+   }
+   .ds2-menu-btn:hover,
+   .ds2-menu-btn:focus        { background: rgba(59,130,246,.08); color: #2563eb; outline: none; }
+   .ds2-menu-btn.btn_delete:hover,
+   .ds2-menu-btn.btn_delete:focus { background: rgba(220,38,38,.08); color: #dc2626; }
+   .ds2-menu-btn i            { width: 16px; text-align: center; font-size: 13px; flex-shrink: 0; }
+   </style>
 
-   window.onclick = function(event) {
-     if (!event.target.matches('.dropbtn')) {
-       var dropdowns = document.getElementsByClassName("dropdown-content");
-       var i;
-       for (i = 0; i < dropdowns.length; i++) {
-         var openDropdown = dropdowns[i];
-         if (openDropdown.classList.contains('show')) {
-           openDropdown.classList.remove('show');
-         }
-       }
+   <script>
+   /* ── DS2 Action Menu ──────────────────────────────────────────────
+      Single floating div appended to document.body.
+      Never inside the table DOM — immune to all overflow/stacking contexts.
+   ─────────────────────────────────────────────────────────────────── */
+   (function () {
+     var menu = document.createElement('div');
+     menu.id = 'ds2-action-menu';
+     Object.assign(menu.style, {
+       position:     'fixed',
+       zIndex:       '100000',
+       width:        '180px',
+       background:   '#ffffff',
+       borderRadius: '12px',
+       boxShadow:    '0 8px 24px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.08)',
+       border:       '1px solid rgba(0,0,0,.08)',
+       padding:      '4px',
+       display:      'none',
+       fontFamily:   'inherit',
+       overflow:     'hidden'
+     });
+     document.body.appendChild(menu);
+
+     var _oid = null;
+
+     function hideMenu() {
+       menu.style.display = 'none';
+       _oid = null;
      }
-   }
-</script>
+
+     function menuItem(oid, cls, icon, label, extraAttrs) {
+       return '<button type="button" value="' + oid + '" class="ds2-menu-btn ' + cls + '"'
+         + (extraAttrs ? ' ' + extraAttrs : '') + '>'
+         + '<i class="' + icon + '"></i>'
+         + '<span>' + label + '</span>'
+         + '</button>';
+     }
+
+     // Clicking any item inside the menu closes it (action fires via delegated handlers)
+     menu.addEventListener('click', function (e) {
+       if (e.target.closest('button')) { hideMenu(); }
+     });
+
+     document.addEventListener('click', function (e) {
+       var btn = e.target.closest('.dropbtn');
+       if (btn) {
+         e.stopPropagation();
+         var oid = btn.value;
+         if (_oid === oid) { hideMenu(); return; }
+         hideMenu();
+
+         menu.innerHTML =
+           menuItem(oid, 'btn_archive cmn_icon', 'fa fa-archive', 'Archive', '') +
+           menuItem(oid, 'btn_delete cmn_icon',  'fa fa-trash',   'Delete',  '');
+
+         var rect = btn.getBoundingClientRect();
+         var left = Math.min(rect.right - 180, window.innerWidth - 192);
+         if (left < 12) left = 12;
+         menu.style.top     = (rect.bottom + 8) + 'px';
+         menu.style.left    = left + 'px';
+         menu.style.display = 'flex';
+         _oid = oid;
+         return;
+       }
+       if (!e.target.closest('#ds2-action-menu')) { hideMenu(); }
+     });
+
+     window.addEventListener('scroll', hideMenu, true);
+     window.addEventListener('resize', hideMenu);
+   })();
+   </script>
 
 <!--Js for Sidebar Function 17-10-24 Adding Class of Elements-->
 <script>
@@ -1557,5 +1675,20 @@ button.view_icon_btn.btn_report {
   });
 </script>
 <!--Js for Sidebar Function 17-10-24-->
+
+<script>
+/* ── DS2: active nav state ── */
+(function () {
+   var path = window.location.pathname;
+   document.querySelectorAll('.sideMenu_ottr a').forEach(function (a) {
+      try {
+         var ap = new URL(a.href).pathname;
+         if (path === ap || path.endsWith(ap.replace(/^.*\/portal\//, '/portal/'))) {
+            a.classList.add('ds2-active');
+         }
+      } catch (e) {}
+   });
+})();
+</script>
    </body>
 </html>

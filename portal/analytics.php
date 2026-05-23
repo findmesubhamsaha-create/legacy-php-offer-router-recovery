@@ -17,6 +17,7 @@ require __DIR__ . '/library/Settings.php';
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.2/css/all.min.css" crossorigin="anonymous">
    <link rel="stylesheet" href="assets/css/dashboard_style.css">
    <link rel="stylesheet" href="assets/css/modern.css">
+   <link rel="stylesheet" href="assets/css/design-system-v2.css">
    <style>
       /* ── analytics-specific tokens ── */
       :root {
@@ -205,7 +206,8 @@ require __DIR__ . '/library/Settings.php';
       <button id="open_sidebar" class="IconClick">
          <img src="assets/images/menu.png" alt="Menu">
       </button>
-      <span style="font-weight:600; font-size:15px; color:#111827;">Analytics</span>
+      <span class="ds2-topbar-title">Analytics</span>
+      <span class="ds2-topbar-live"><span class="ds2-live-dot"></span> Live</span>
    </div>
 
    <!-- Sidebar -->
@@ -215,10 +217,10 @@ require __DIR__ . '/library/Settings.php';
       </button>
       <div class="sideMenu_ottr">
          <ul>
-            <li><a href="<?= BASE_URL ?>/portal/dashboard.php">Offers</a></li>
-            <li><a href="<?= BASE_URL ?>/portal/analytics.php">Analytics</a></li>
-            <li><a href="<?= BASE_URL ?>/portal/import.php">Import</a></li>
-            <li><a href="<?= BASE_URL ?>/portal/export/">Export</a></li>
+            <li><a href="<?= BASE_URL ?>/portal/dashboard.php"><i class="fas fa-th-list ds2-nav-icon"></i> Offers</a></li>
+            <li><a href="<?= BASE_URL ?>/portal/analytics.php"><i class="fas fa-chart-bar ds2-nav-icon"></i> Analytics</a></li>
+            <li><a href="<?= BASE_URL ?>/portal/import.php"><i class="fas fa-file-import ds2-nav-icon"></i> Import</a></li>
+            <li><a href="<?= BASE_URL ?>/portal/export/"><i class="fas fa-file-export ds2-nav-icon"></i> Export</a></li>
          </ul>
       </div>
    </div>
@@ -231,19 +233,33 @@ require __DIR__ . '/library/Settings.php';
          <div class="an-kpi-grid" id="kpi-grid">
             <div class="an-kpi-card">
                <div class="an-kpi-icon blue"><i class="fas fa-mouse-pointer"></i></div>
-               <div><div class="an-kpi-label">Clicks Today</div><div class="an-kpi-value" id="kpi-clicks-today">—</div></div>
+               <div>
+                  <div class="an-kpi-label">Clicks Today</div>
+                  <div class="an-kpi-value" id="kpi-clicks-today"><span class="ds2-skel ds2-skel-val"></span></div>
+                  <div id="kpi-delta-clicks"></div>
+               </div>
             </div>
             <div class="an-kpi-card">
                <div class="an-kpi-icon green"><i class="fas fa-bullseye"></i></div>
-               <div><div class="an-kpi-label">Active Offers</div><div class="an-kpi-value" id="kpi-active-offers">—</div></div>
+               <div>
+                  <div class="an-kpi-label">Active Offers</div>
+                  <div class="an-kpi-value" id="kpi-active-offers"><span class="ds2-skel ds2-skel-val"></span></div>
+               </div>
             </div>
             <div class="an-kpi-card">
                <div class="an-kpi-icon purple"><i class="fas fa-route"></i></div>
-               <div><div class="an-kpi-label">Active Routes</div><div class="an-kpi-value" id="kpi-active-routes">—</div></div>
+               <div>
+                  <div class="an-kpi-label">Active Routes</div>
+                  <div class="an-kpi-value" id="kpi-active-routes"><span class="ds2-skel ds2-skel-val"></span></div>
+               </div>
             </div>
             <div class="an-kpi-card">
                <div class="an-kpi-icon orange"><i class="fas fa-users"></i></div>
-               <div><div class="an-kpi-label">Unique IPs Today</div><div class="an-kpi-value" id="kpi-unique-ips">—</div></div>
+               <div>
+                  <div class="an-kpi-label">Unique IPs Today</div>
+                  <div class="an-kpi-value" id="kpi-unique-ips"><span class="ds2-skel ds2-skel-val"></span></div>
+                  <div id="kpi-delta-ips"></div>
+               </div>
             </div>
          </div>
 
@@ -259,13 +275,19 @@ require __DIR__ . '/library/Settings.php';
                         <button class="an-range-btn" data-days="7" id="trend-btn-7">7d</button>
                      </span>
                   </div>
-                  <div class="an-chart-wrap"><canvas id="trendChart"></canvas></div>
+                  <div class="an-chart-wrap" id="trend-chart-wrap">
+                     <span class="ds2-skel ds2-skel-chart" id="trend-chart-skel"></span>
+                     <canvas id="trendChart" style="display:none;"></canvas>
+                  </div>
                </div>
             </div>
             <div class="col-lg-4">
                <div class="an-section" style="height: calc(100% - 0px);">
                   <div class="an-section-title"><i class="fas fa-network-wired"></i> Network Breakdown <small class="text-muted fw-normal ms-1" style="font-size:11px;">(30d)</small></div>
-                  <div class="an-chart-wrap"><canvas id="networkChart"></canvas></div>
+                  <div class="an-chart-wrap" id="network-chart-wrap">
+                     <span class="ds2-skel ds2-skel-chart" id="network-chart-skel"></span>
+                     <canvas id="networkChart" style="display:none;"></canvas>
+                  </div>
                </div>
             </div>
          </div>
@@ -285,7 +307,16 @@ require __DIR__ . '/library/Settings.php';
                   <div id="top-offers-wrap" style="max-height:320px; overflow-y:auto;">
                      <table class="an-table" id="top-offers-table">
                         <thead><tr><th>#</th><th>Offer</th><th>Network</th><th>Clicks</th></tr></thead>
-                        <tbody><tr><td colspan="4" class="text-center text-muted py-3">Loading…</td></tr></tbody>
+                        <tbody id="top-offers-tbody">
+                           <?php for ($i = 0; $i < 5; $i++): ?>
+                           <tr>
+                              <td><span class="ds2-skel" style="width:16px;height:11px;"></span></td>
+                              <td><span class="ds2-skel ds2-skel-full"></span></td>
+                              <td><span class="ds2-skel ds2-skel-md"></span></td>
+                              <td><span class="ds2-skel ds2-skel-sm"></span></td>
+                           </tr>
+                           <?php endfor; ?>
+                        </tbody>
                      </table>
                   </div>
                </div>
@@ -337,7 +368,9 @@ require __DIR__ . '/library/Settings.php';
          <div class="an-section mb-3">
             <div class="an-section-title"><i class="fas fa-heartbeat"></i> Offer Health Issues</div>
             <div id="health-wrap">
-               <div class="text-muted text-center py-3" style="font-size:13px;">Loading…</div>
+               <div class="ds2-skel-row"><div class="ds2-skel ds2-skel-col"></div><div class="ds2-skel ds2-skel-col-sm"></div></div>
+               <div class="ds2-skel-row"><div class="ds2-skel ds2-skel-col"></div><div class="ds2-skel ds2-skel-col-sm"></div></div>
+               <div class="ds2-skel-row"><div class="ds2-skel ds2-skel-col" style="width:60%;"></div><div class="ds2-skel ds2-skel-col-sm"></div></div>
             </div>
          </div>
 
@@ -388,11 +421,18 @@ function ajaxPost(requestMethod, extraData, callback) {
       type: 'POST',
       data: Object.assign({ requestMethod: requestMethod }, extraData),
       success: function (data) {
-         var parsed = (typeof data === 'string') ? JSON.parse(data) : data;
+         var parsed;
+         try {
+            parsed = (typeof data === 'string') ? JSON.parse(data) : data;
+         } catch (e) {
+            console.error('[analytics] JSON parse failed for', requestMethod, e);
+            parsed = null;
+         }
          callback(parsed);
       },
-      error: function (xhr) {
-         console.error('[analytics]', requestMethod, xhr.responseText);
+      error: function (xhr, status, err) {
+         console.error('[analytics] Request failed for', requestMethod, status, err);
+         callback(null);
       }
    });
 }
@@ -401,12 +441,31 @@ function ajaxPost(requestMethod, extraData, callback) {
 var trendChart = null;
 var networkChart = null;
 
+/* ── Delta badge builder ── */
+function buildDelta(today, yesterday) {
+   if (yesterday === 0 && today === 0) return '<span class="ds2-delta ds2-delta-flat"><i class="fas fa-minus"></i> No data yet</span>';
+   if (yesterday === 0) return '<span class="ds2-delta ds2-delta-new"><i class="fas fa-circle"></i> New today</span>';
+   var diff = today - yesterday;
+   var pct  = Math.round(Math.abs(diff) / yesterday * 100);
+   if (diff > 0)  return '<span class="ds2-delta ds2-delta-up"><i class="fas fa-arrow-up"></i> +' + pct + '% vs yesterday</span>';
+   if (diff < 0)  return '<span class="ds2-delta ds2-delta-down"><i class="fas fa-arrow-down"></i> ' + pct + '% vs yesterday</span>';
+   return '<span class="ds2-delta ds2-delta-flat"><i class="fas fa-minus"></i> Same as yesterday</span>';
+}
+
 /* ── KPI cards ── */
 ajaxPost('getKpiCards', {}, function (d) {
    document.getElementById('kpi-clicks-today').textContent  = d.clicks_today.toLocaleString();
    document.getElementById('kpi-active-offers').textContent = d.active_offers.toLocaleString();
    document.getElementById('kpi-active-routes').textContent = d.active_routes.toLocaleString();
    document.getElementById('kpi-unique-ips').textContent    = d.unique_ips_today.toLocaleString();
+
+   // Trend deltas (only shown for metrics with yesterday comparison)
+   if (d.clicks_yesterday !== undefined) {
+      document.getElementById('kpi-delta-clicks').innerHTML = buildDelta(d.clicks_today, d.clicks_yesterday);
+   }
+   if (d.unique_ips_yesterday !== undefined) {
+      document.getElementById('kpi-delta-ips').innerHTML = buildDelta(d.unique_ips_today, d.unique_ips_yesterday);
+   }
 });
 
 /* ── Daily trend chart ── */
@@ -419,6 +478,8 @@ function loadTrendChart(days) {
       var ctx    = document.getElementById('trendChart').getContext('2d');
 
       if (trendChart) trendChart.destroy();
+      document.getElementById('trend-chart-skel').style.display = 'none';
+      document.getElementById('trendChart').style.display = '';
       trendChart = new Chart(ctx, {
          type: 'line',
          data: {
@@ -478,6 +539,8 @@ ajaxPost('getNetworkBreakdown', { days: 30 }, function (rows) {
       ctx.canvas.parentElement.innerHTML = '<div class="text-muted text-center pt-5" style="font-size:13px;">No data</div>';
       return;
    }
+   document.getElementById('network-chart-skel').style.display = 'none';
+   document.getElementById('networkChart').style.display = '';
    networkChart = new Chart(ctx, {
       type: 'doughnut',
       data: {
@@ -506,9 +569,9 @@ ajaxPost('getNetworkBreakdown', { days: 30 }, function (rows) {
 /* ── Top Offers ── */
 function loadTopOffers(days) {
    ajaxPost('getTopOffers', { days: days }, function (rows) {
-      var tbody = document.querySelector('#top-offers-table tbody');
+      var tbody = document.getElementById('top-offers-tbody');
       if (!rows.length) {
-         tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">No data</td></tr>';
+         tbody.innerHTML = '<tr><td colspan="4"><div class="ds2-empty"><div class="ds2-empty-icon"><i class="fas fa-trophy"></i></div><div class="ds2-empty-title">No offers found</div><div class="ds2-empty-body">No click data for this period</div></div></td></tr>';
          return;
       }
       tbody.innerHTML = rows.map(function (r, i) {
@@ -596,15 +659,36 @@ ajaxPost('getTrafficQuality', { days: 30 }, function (d) {
 /* ── Offer Health ── */
 ajaxPost('getOfferHealthIssues', {}, function (issues) {
    var wrap = document.getElementById('health-wrap');
-   if (!issues.length) {
-      wrap.innerHTML = '<div style="color:#16a34a;font-size:13px;"><i class="fas fa-check-circle me-1"></i> All active offers are healthy.</div>';
+   if (!Array.isArray(issues)) {
+      wrap.innerHTML = '<div class="ds2-empty" style="padding:32px 24px;">'
+         + '<div class="ds2-empty-icon"><i class="fas fa-exclamation-circle" style="color:#f59e0b;font-size:28px;"></i></div>'
+         + '<div class="ds2-empty-title">Health check unavailable</div>'
+         + '<div class="ds2-empty-body">Could not load health data. Check server connectivity.</div>'
+         + '</div>';
       return;
    }
-   var isDanger = function (issue) { return issue.indexOf('No active') !== -1 || issue.indexOf('Expired') !== -1; };
-   wrap.innerHTML = '<table class="an-table"><thead><tr><th>Offer</th><th>Issue</th></tr></thead><tbody>' +
+   if (!issues.length) {
+      wrap.innerHTML = '<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#166534;">'
+         + '<span class="ds2-health-dot ok"></span>'
+         + '<span class="ds2-anomaly-ok" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;">'
+         + '<i class="fas fa-check-circle"></i> All active offers are healthy</span></div>';
+      return;
+   }
+   var getBadgeClass = function (issue) {
+      if (issue.indexOf('No active') !== -1 || issue.indexOf('Expired') !== -1) return 'ds2-anomaly-critical';
+      return 'ds2-anomaly';
+   };
+   var getDotClass = function (issue) {
+      if (issue.indexOf('No active') !== -1 || issue.indexOf('Expired') !== -1) return 'danger';
+      return 'warn';
+   };
+   wrap.innerHTML = '<table class="an-table"><thead><tr><th style="width:24px;"></th><th>Offer</th><th>Issue</th></tr></thead><tbody>' +
       issues.map(function (r) {
-         var cls = isDanger(r.issue) ? 'danger' : '';
-         return '<tr><td>' + escHtml(r.offer) + '</td><td><span class="an-health-badge ' + cls + '">' + escHtml(r.issue) + '</span></td></tr>';
+         return '<tr>'
+            + '<td><span class="ds2-health-dot ' + getDotClass(r.issue) + '"></span></td>'
+            + '<td>' + escHtml(r.offer) + '</td>'
+            + '<td><span class="' + getBadgeClass(r.issue) + '">' + escHtml(r.issue) + '</span></td>'
+            + '</tr>';
       }).join('') + '</tbody></table>';
 });
 
@@ -635,6 +719,19 @@ function escHtml(str) {
    if (str == null) return '—';
    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+/* ── DS2: active nav state ── */
+(function () {
+   var path = window.location.pathname;
+   document.querySelectorAll('.sideMenu_ottr a').forEach(function (a) {
+      try {
+         var ap = new URL(a.href).pathname;
+         if (path === ap || path.endsWith(ap.replace(/^.*\/portal\//, '/portal/'))) {
+            a.classList.add('ds2-active');
+         }
+      } catch (e) {}
+   });
+})();
 </script>
 </body>
 </html>

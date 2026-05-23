@@ -466,43 +466,6 @@ button.view_icon_btn.btn_report {
 button.view_icon_btn.btn_report:hover { background: #f3f4f6 !important; border-color: var(--m-border) !important; }
 
 
-/* ─── Three-dot Dropdown ────────────────────────────────────────── */
-.dropdown-content {
-  background:    var(--m-surface) !important;
-  border:        1px solid var(--m-border) !important;
-  border-radius: var(--m-r-md) !important;
-  box-shadow:    var(--m-shadow-lg) !important;
-  padding:       4px !important;
-  min-width:     160px !important;
-  overflow:      hidden;
-}
-
-.sub_menu { background: transparent !important; }
-.sub_menu ul { margin: 0 !important; padding: 0 !important; }
-
-.sub_menu ul li {
-  background:    transparent !important;
-  border-bottom: none !important;
-  padding:       0 !important;
-  margin:        0 !important;
-}
-
-.sub_menu ul li button {
-  font-family:   var(--m-font) !important;
-  font-size:     13.5px !important;
-  padding:       8px 12px !important;
-  border-radius: var(--m-r-sm) !important;
-  width:         100% !important;
-  text-align:    left !important;
-  color:         var(--m-text-2) !important;
-  background:    transparent !important;
-  transition:    background var(--m-ease) !important;
-}
-.sub_menu ul li button:hover { background: #f3f4f6 !important; }
-.sub_menu ul li:last-child    { border: none !important; }
-
-.sub_menu ul li button span.sting_icon { margin-right: 6px; }
-.sub_menu ul li button span.sting_icon img { width: 13px !important; }
 
 
 /* ─── Offer Name Cell ───────────────────────────────────────────── */

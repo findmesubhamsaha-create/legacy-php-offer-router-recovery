@@ -368,41 +368,7 @@ class Offer
 				    <span class="sting_icon outer_btn">
 				        <i class="fas fa-link"></i></span>
 				</button>
-				<button onclick="myFunction('.$final_offer_list[$i]["id"].')" value="'.$final_offer_list[$i]["id"].'" class="dropbtn">
-				</button>
-				<div id="myDropdown_'.$final_offer_list[$i]["id"].'" class="dropdown-content">
-
-				    <div class="sub_menu">
-
-				        <ul>
-
-				            <li>
-				                <button type="button" value="'.$final_offer_list[$i]["id"].'" class="view_icon_btn btn_report cmn_icon" data-bs-toggle="modal" data-bs-target="#clickexampleModal">
-				                    <span class="sting_icon">
-				                    <i class="fa fa-eye" ></i>
-				                  </span> View Report
-				                </button>
-				            </li>
-
-				            <li>
-				                <button type="button" value="'.$final_offer_list[$i]["id"].'" class="btn_archive cmn_icon">
-				                    <span class="sting_icon">
-				                <i class="fa fa-archive"></i> 
-				                </span> Archive
-				                </button>
-				            </li>
-
-				            <li>
-				                <button type="button" value="'.$final_offer_list[$i]["id"].'" class="btn_delete cmn_icon">
-				                    <span class="sting_icon">
-				                  <i class="fa fa-trash"></i></span> Delete
-				                </button>
-				            </li>
-				        </ul>
-
-				    </div>
-
-				</div>
+				<button value="'.$final_offer_list[$i]["id"].'" class="dropbtn"></button>
 				</span>';
 	 		}
 	 		else{

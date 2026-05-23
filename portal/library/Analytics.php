@@ -18,17 +18,21 @@ class Analytics
     {
         $db = $this->connect();
 
-        $clicks_today  = (int)$db->query("SELECT COUNT(*) AS c FROM tbl_click WHERE created_at = CURDATE()")->fetch_assoc()['c'];
-        $active_offers = (int)$db->query("SELECT COUNT(*) AS c FROM tbl_offer_url WHERE offer_status = 1")->fetch_assoc()['c'];
-        $active_routes = (int)$db->query("SELECT COUNT(*) AS c FROM tbl_sub_offer_url WHERE status = 'yes' AND deleted_status = 'no'")->fetch_assoc()['c'];
-        $unique_ips    = (int)$db->query("SELECT COUNT(DISTINCT ip_address) AS c FROM tbl_click WHERE created_at = CURDATE()")->fetch_assoc()['c'];
+        $clicks_today      = (int)$db->query("SELECT COUNT(*) AS c FROM tbl_click WHERE created_at = CURDATE()")->fetch_assoc()['c'];
+        $active_offers     = (int)$db->query("SELECT COUNT(*) AS c FROM tbl_offer_url WHERE offer_status = 1")->fetch_assoc()['c'];
+        $active_routes     = (int)$db->query("SELECT COUNT(*) AS c FROM tbl_sub_offer_url WHERE status = 'yes' AND deleted_status = 'no'")->fetch_assoc()['c'];
+        $unique_ips        = (int)$db->query("SELECT COUNT(DISTINCT ip_address) AS c FROM tbl_click WHERE created_at = CURDATE()")->fetch_assoc()['c'];
+        $clicks_yesterday  = (int)$db->query("SELECT COUNT(*) AS c FROM tbl_click WHERE created_at = DATE_SUB(CURDATE(), INTERVAL 1 DAY)")->fetch_assoc()['c'];
+        $unique_ips_yest   = (int)$db->query("SELECT COUNT(DISTINCT ip_address) AS c FROM tbl_click WHERE created_at = DATE_SUB(CURDATE(), INTERVAL 1 DAY)")->fetch_assoc()['c'];
 
         $db->close();
         return [
-            'clicks_today'    => $clicks_today,
-            'active_offers'   => $active_offers,
-            'active_routes'   => $active_routes,
-            'unique_ips_today' => $unique_ips,
+            'clicks_today'        => $clicks_today,
+            'active_offers'       => $active_offers,
+            'active_routes'       => $active_routes,
+            'unique_ips_today'    => $unique_ips,
+            'clicks_yesterday'    => $clicks_yesterday,
+            'unique_ips_yesterday' => $unique_ips_yest,
         ];
     }
 
@@ -103,8 +107,10 @@ class Analytics
                AND (SELECT COUNT(*) FROM tbl_sub_offer_url s
                     WHERE s.main_offer_id = o.id AND s.status = 'yes' AND s.deleted_status = 'no') = 0"
         );
-        while ($row = $res->fetch_assoc()) {
-            $issues[] = ['offer_id' => $row['id'], 'offer' => $row['offer'], 'issue' => 'No active sub-URLs'];
+        if ($res) {
+            while ($row = $res->fetch_assoc()) {
+                $issues[] = ['offer_id' => $row['id'], 'offer' => $row['offer'], 'issue' => 'No active sub-URLs'];
+            }
         }
 
         // Active offers with 0 clicks in last 30 days
@@ -114,21 +120,34 @@ class Analytics
                AND (SELECT COUNT(*) FROM tbl_click c
                     WHERE c.offer_id = o.id AND c.created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)) = 0"
         );
-        while ($row = $res->fetch_assoc()) {
-            $issues[] = ['offer_id' => $row['id'], 'offer' => $row['offer'], 'issue' => 'No clicks in last 30 days'];
+        if ($res) {
+            while ($row = $res->fetch_assoc()) {
+                $issues[] = ['offer_id' => $row['id'], 'offer' => $row['offer'], 'issue' => 'No clicks in last 30 days'];
+            }
         }
 
-        // Expired offers still active
-        $res = $db->query(
-            "SELECT id, offer, end_date FROM tbl_offer_url
-             WHERE offer_status = 1
-               AND end_date IS NOT NULL
-               AND end_date != ''
-               AND end_date != '0000-00-00'
-               AND end_date < CURDATE()"
+        // Expired offers still active — column may not exist on older schemas;
+        // check via information_schema before querying to avoid fatal on missing column.
+        $col_check = $db->query(
+            "SELECT COUNT(*) AS c FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND TABLE_NAME = 'tbl_offer_url'
+               AND COLUMN_NAME = 'end_date'"
         );
-        while ($row = $res->fetch_assoc()) {
-            $issues[] = ['offer_id' => $row['id'], 'offer' => $row['offer'], 'issue' => 'Expired (' . $row['end_date'] . ') but still routing'];
+        if ($col_check && (int)$col_check->fetch_assoc()['c'] > 0) {
+            $res = $db->query(
+                "SELECT id, offer, end_date FROM tbl_offer_url
+                 WHERE offer_status = 1
+                   AND end_date IS NOT NULL
+                   AND end_date != ''
+                   AND end_date != '0000-00-00'
+                   AND end_date < CURDATE()"
+            );
+            if ($res) {
+                while ($row = $res->fetch_assoc()) {
+                    $issues[] = ['offer_id' => $row['id'], 'offer' => $row['offer'], 'issue' => 'Expired (' . $row['end_date'] . ') but still routing'];
+                }
+            }
         }
 
         $db->close();
@@ -218,18 +237,21 @@ class Analytics
     public function getOfferAnalytics(): array
     {
         $db  = $this->connect();
+        // Correlated subqueries prevent the N×M Cartesian product that
+        // inflated active_routes and total_clicks when both tbl_sub_offer_url
+        // and tbl_click were joined directly to tbl_offer_url.
         $res = $db->query(
             "SELECT o.id, o.offer, o.slug_name, t.tag_name, n.network_name,
-                    COUNT(DISTINCT CASE WHEN s.deleted_status = 'no' THEN s.id END) AS sub_offer_count,
-                    SUM(CASE WHEN s.status = 'yes' AND s.deleted_status = 'no' THEN 1 ELSE 0 END) AS active_routes,
-                    COUNT(c.id) AS total_clicks
+                    (SELECT COUNT(*) FROM tbl_sub_offer_url s
+                     WHERE s.main_offer_id = o.id AND s.deleted_status = 'no') AS sub_offer_count,
+                    (SELECT COUNT(*) FROM tbl_sub_offer_url s
+                     WHERE s.main_offer_id = o.id AND s.status = 'yes' AND s.deleted_status = 'no') AS active_routes,
+                    (SELECT COUNT(*) FROM tbl_click c
+                     WHERE c.offer_id = o.id) AS total_clicks
              FROM tbl_offer_url o
              LEFT JOIN tbl_tag t ON o.tag_id = t.id
              LEFT JOIN tbl_network n ON o.network_id = n.id
-             LEFT JOIN tbl_sub_offer_url s ON o.id = s.main_offer_id
-             LEFT JOIN tbl_click c ON o.id = c.offer_id
              WHERE o.offer_status = 1
-             GROUP BY o.id
              ORDER BY total_clicks DESC"
         );
         $result = [];
