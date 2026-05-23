@@ -5,6 +5,8 @@ if (!isset($_SESSION['is_login']) || $_SESSION['is_login'] !== true) {
     header('Location: ../index.php');
     exit;
 }
+// DU-01: load BASE_URL before HTML output so template can use it
+require dirname(__FILE__) . '/../library/Settings.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -33,7 +35,7 @@ if (!isset($_SESSION['is_login']) || $_SESSION['is_login'] !== true) {
             <div class="sideMenu_ottr">
                <ul class="">
                   <li>
-                     <a href="https://efbhalvbhdsurl.com/portal/dashboard.php">
+                     <a href="<?= BASE_URL ?>/portal/dashboard.php">
                      Back to dashboard
                      </a>
                   </li>
@@ -47,8 +49,6 @@ if (!isset($_SESSION['is_login']) || $_SESSION['is_login'] !== true) {
 
 
 <?php
-require dirname(__FILE__) . '/../library/Settings.php';
-
 $mysqli = new mysqli(DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME);
 
 

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 if (!defined('BASEPATH')){
     exit('Direct script access is not allowed!');
 }

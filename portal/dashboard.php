@@ -5,6 +5,8 @@ if (!isset($_SESSION['is_login']) || $_SESSION['is_login'] !== true) {
     header('Location: index.php');
     exit;
 }
+// DU-01: load BASE_URL for dynamic link generation
+require dirname(__FILE__) . '/library/Settings.php';
 ?>
 
 <!doctype html>
@@ -201,12 +203,12 @@ button.view_icon_btn.btn_report {
          <div class="sideMenu_ottr">
             <ul class="">
                <li>
-                  <a href="https://efbhalvbhdsurl.com/portal/import.php">
+                  <a href="<?= BASE_URL ?>/portal/import.php">
                      Import
                   </a>
                </li>
                <li>
-                  <a href="https://efbhalvbhdsurl.com/portal/export/">
+                  <a href="<?= BASE_URL ?>/portal/export/">
                      Export
                   </a>
                </li>

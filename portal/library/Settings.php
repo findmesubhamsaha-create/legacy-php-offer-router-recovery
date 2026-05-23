@@ -44,6 +44,16 @@ if (!defined('DB_HOST')) {
         define('DB_NAME',        $env['DB_NAME']     ?? 'efbhalvbhdsurl');
         define('DB_USER_TABLE',  'tbl_user');
         define('DB_OFFER_TABLE', 'tbl_offer_url');
+
+        // BASE_URL: APP_URL in .env takes precedence (behind-proxy / production).
+        // Falls back to protocol+host from the current HTTP request.
+        // CLI context (no HTTP_HOST) falls back to APP_URL or http://localhost.
+        if (isset($_SERVER['HTTP_HOST'])) {
+            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            define('BASE_URL', $env['APP_URL'] ?? ($scheme . '://' . $_SERVER['HTTP_HOST']));
+        } else {
+            define('BASE_URL', $env['APP_URL'] ?? 'http://localhost');
+        }
     })();
 }
 ?>

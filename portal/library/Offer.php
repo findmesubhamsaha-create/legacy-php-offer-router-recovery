@@ -22,7 +22,8 @@ class Offer
  	public function checkSlug($param){
  		// return $param;
  		//$hasoffer = $this->db->fetch_data(DB_OFFER_TABLE,['offer'=>$param],1);
- 		$hasslug = $this->db->fetch_data(DB_OFFER_TABLE,'slug_name like "%'.strtolower($param).'%"',1);
+ 		// RI-HOTFIX-V1 M-01: exact match aligns with routing's = lookup; LIKE caused false-positive blocks
+ 		$hasslug = $this->db->fetch_data(DB_OFFER_TABLE,['slug_name'=>strtolower($param)],1);
  		return $hasslug;
  	}
 
@@ -344,7 +345,9 @@ class Offer
 		
 		$data = array();
 		for ($i=0; $i < count($final_offer_list); $i++) {
-			$link = 'https://efbhalvbhdsurl.com/?oid='.$final_offer_list[$i]['slug_name'].'&tag='.$final_offer_list[$i]['tag_name'].'&affid='.$final_offer_list[$i]['network_name'];
+			// RI-HOTFIX-V1 AJ-02: ?? '' guards — tag_name/network_name can be NULL from LEFT JOIN miss
+			// DU-01: BASE_URL replaces hardcoded domain — resolves to current host at runtime
+			$link = BASE_URL.'/?oid='.($final_offer_list[$i]['slug_name'] ?? '').'&tag='.($final_offer_list[$i]['tag_name'] ?? '').'&affid='.($final_offer_list[$i]['network_name'] ?? '');
 	 		if($final_offer_list[$i]['offer_status'] == 1){
 	 			$action = '<span style="position:relative;" value="'.$final_offer_list[$i]["id"].'">
 	 			<input id="hdn_'.$final_offer_list[$i]["id"].'" type="text" style="display:none;" name="hdn_'.$final_offer_list[$i]["id"].'" value="'.$link.'">
@@ -415,11 +418,12 @@ class Offer
 			// $sub_array[] = $final_offer_list[$i]['clicks'];
 			// $sub_array[] = $action;
 
-			$sub_array[] = strlen($final_offer_list[$i]['offer']) > 15 ? substr($final_offer_list[$i]['offer'],0,15)."..." : $final_offer_list[$i]['offer'];
-			$sub_array[] = strlen($final_offer_list[$i]['slug_name']) > 15 ? substr($final_offer_list[$i]['slug_name'],0,15)."..." : $final_offer_list[$i]['slug_name'];
-			$sub_array[] = strlen($final_offer_list[$i]['tag_name']) > 15 ? substr($final_offer_list[$i]['tag_name'],0,15)."..." : $final_offer_list[$i]['tag_name'];
-			$sub_array[] = strlen($final_offer_list[$i]['note']) > 15 ? substr($final_offer_list[$i]['note'],0,15)."..." : $final_offer_list[$i]['note'];
-			$sub_array[] = strlen($final_offer_list[$i]['network_name']) > 15 ? substr($final_offer_list[$i]['network_name'],0,15)."..." : $final_offer_list[$i]['network_name'];
+			// RI-HOTFIX-V1 AJ-03: ?? '' guards — PHP 8.2 Deprecated: strlen(null) corrupts JSON via ob buffer
+			$sub_array[] = strlen($final_offer_list[$i]['offer'] ?? '') > 15 ? substr($final_offer_list[$i]['offer'],0,15)."..." : ($final_offer_list[$i]['offer'] ?? '');
+			$sub_array[] = strlen($final_offer_list[$i]['slug_name'] ?? '') > 15 ? substr($final_offer_list[$i]['slug_name'],0,15)."..." : ($final_offer_list[$i]['slug_name'] ?? '');
+			$sub_array[] = strlen($final_offer_list[$i]['tag_name'] ?? '') > 15 ? substr($final_offer_list[$i]['tag_name'],0,15)."..." : ($final_offer_list[$i]['tag_name'] ?? '');
+			$sub_array[] = strlen($final_offer_list[$i]['note'] ?? '') > 15 ? substr($final_offer_list[$i]['note'],0,15)."..." : ($final_offer_list[$i]['note'] ?? '');
+			$sub_array[] = strlen($final_offer_list[$i]['network_name'] ?? '') > 15 ? substr($final_offer_list[$i]['network_name'],0,15)."..." : ($final_offer_list[$i]['network_name'] ?? '');
 			$sub_array[] = $final_offer_list[$i]['clicks'];
 			$sub_array[] = $action;
 

@@ -3,6 +3,7 @@
 // ini_set('display_errors', true);
 session_start();
 ob_start();  // RC-09: buffer output so stray warnings cannot corrupt JSON responses
+ini_set('display_errors', '0');  // RI-HOTFIX-V1 AJ-01: prevent PHP 8.2 Deprecated notices from leaking into JSON responses
 header('Content-Type: application/json; charset=utf-8');  // RC-12
 require dirname(__FILE__) . '/library/Settings.php';
 require dirname(__FILE__) . '/library/database/Database.php';
