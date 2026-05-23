@@ -37,7 +37,12 @@ require dirname(__FILE__) . '/../library/Settings.php';
                <ul class="">
                   <li>
                      <a href="<?= BASE_URL ?>/portal/dashboard.php">
-                     Back to dashboard
+                     Offers
+                     </a>
+                  </li>
+                  <li>
+                     <a href="<?= BASE_URL ?>/portal/analytics.php">
+                     Analytics
                      </a>
                   </li>
                </ul>

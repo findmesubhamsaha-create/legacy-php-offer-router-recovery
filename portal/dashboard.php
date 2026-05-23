@@ -213,7 +213,12 @@ button.view_icon_btn.btn_report {
                      Export
                   </a>
                </li>
-               
+               <li>
+                  <a href="<?= BASE_URL ?>/portal/analytics.php">
+                     Analytics
+                  </a>
+               </li>
+
             </ul>
 
          </div>

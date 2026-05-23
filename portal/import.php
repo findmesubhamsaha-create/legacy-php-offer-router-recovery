@@ -35,7 +35,12 @@ if (!isset($_SESSION['is_login']) || $_SESSION['is_login'] !== true) {
                <ul class="">
                   <li>
                      <a href="dashboard.php">
-                     Back to dashboard
+                     Offers
+                     </a>
+                  </li>
+                  <li>
+                     <a href="analytics.php">
+                     Analytics
                      </a>
                   </li>
                </ul>
